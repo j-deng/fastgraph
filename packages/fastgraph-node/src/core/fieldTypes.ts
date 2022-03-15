@@ -48,6 +48,11 @@ export function fieldType(
   if (softRef && useSoftRef) {
     return softRef.value
   }
+
+  if (field.decorators.upload) {
+    return 'Upload'
+  }
+
   if (type) {
     return type.keywords?.list ? `[${type.value}]` : type.value
   }
@@ -65,6 +70,11 @@ export function fieldType(
   }
 
   return gqlType
+}
+
+export function objectFieldType(field: ResourceField, resourceKey: string) {
+  const _type = fieldType(field, resourceKey)
+  return _type === 'Upload' ? 'UploadFile' : _type
 }
 
 export function parsePrismaType(field: DMMF.Field): ResourceDecoratorMap {

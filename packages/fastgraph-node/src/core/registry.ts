@@ -1,8 +1,10 @@
+import { MinioStore } from '../fileStores/minio'
 import {
   PermissionCheckMiddleware,
   ValidationMiddleware,
   TransformMiddleware
 } from '../middlewares'
+import { FileStoreAdapter } from './fileStore'
 import { MiddlewareCreator, ResourceEnums, TransformFn } from './types'
 
 type FieldType = { field: string; name: string }
@@ -19,6 +21,7 @@ interface RegistryCreateOptions {
   globalMiddlewares?: MiddlewareCreator[]
   transfroms?: TransformFn[]
   enums?: ResourceEnums
+  fileStore?: FileStoreAdapter
 }
 
 export class MetaRegistry {
@@ -30,10 +33,14 @@ export class MetaRegistry {
   middlewares: { [key: string]: MiddlewareCreator } = {}
   globalMiddlewares: string[] = []
   transforms: { [key: string]: TransformFn } = {}
+  fileStore: FileStoreAdapter
 
   constructor(opts?: RegistryCreateOptions) {
     if (opts?.prisma) {
       this.registerPrismaClient(opts.prisma)
+    }
+    if (opts?.fileStore) {
+      this.registerFileStore(opts.fileStore)
     }
     if (opts?.middlewares) {
       opts.middlewares.map(this.registerMiddleware.bind(this))
@@ -54,6 +61,10 @@ export class MetaRegistry {
 
   registerPrismaClient(prisma: any) {
     this.prisma = prisma
+  }
+
+  registerFileStore(fileStore: FileStoreAdapter) {
+    this.fileStore = fileStore
   }
 
   registerResource(constructor: Function, name?: string) {

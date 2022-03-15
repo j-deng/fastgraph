@@ -40,14 +40,8 @@ export const Readonly = (value: boolean = true): PropertyDecorator =>
 export const Optional = (value: boolean = true): PropertyDecorator =>
   defineField('optional', value)
 
-export const Queryable = (value?: boolean): PropertyDecorator =>
-  defineField('queryable', value)
-
 export const Sortable = (value?: boolean): PropertyDecorator =>
   defineField('sortable', value)
-
-export const Show = (value?: boolean): PropertyDecorator =>
-  defineField('show', value)
 
 export const Omit = (keywords?: {
   [key in ExtResourceRoutes]?: boolean
@@ -80,13 +74,6 @@ export const SoftRef = (
 
 export const Type = (value: string): PropertyDecorator =>
   defineField('type', value)
-
-export const Length = (
-  value?: number,
-  keywords?: { min?: number; max?: number }
-): PropertyDecorator => {
-  return defineField('length', value, keywords)
-}
 
 export const Form = (
   value?: string,
@@ -175,4 +162,20 @@ export function Validation(
   }
   keywords = keywords || {}
   return defineField('validation', value, keywords)
+}
+
+export function Upload(keywords: {
+  bucket: string
+  secure?: boolean
+  image?: boolean
+}) {
+  return defineField('upload', undefined, keywords)
+}
+
+export function Column(keywords: { width?: number; ellipsis?: boolean }) {
+  return defineField('column', undefined, keywords)
+}
+
+export function Transform(value: string) {
+  return defineField('transform', value)
 }

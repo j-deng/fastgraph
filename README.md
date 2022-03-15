@@ -40,6 +40,8 @@ Please fork [fastgraph-startup](https://github.com/j-deng/fastgraph-startup) and
 
 ## TODO
 
-- [ ] File upload
+- [x] File upload
 - [ ] Resource Export & Import
 - [ ] Common used form components
+- [ ] Documention
+- [ ] Testing

@@ -7,6 +7,7 @@ import {
   fieldSoftRef,
   fieldSoftRefToField,
   fieldType,
+  fieldUpload,
   filterFields,
   isFieldRequired,
   isOmit,
@@ -30,12 +31,15 @@ export function resourceName(resource: ResourceItem): string {
   return resource.decorators.resource?.value || resource.key
 }
 
-function _mapRelatedField(field: ResourceField) {
-  if (!fieldRef(field) && !fieldSoftRef(field)) {
-    return `${field.field}`
+function _mapResolveField(field: ResourceField) {
+  if (fieldRef(field) || fieldSoftRef(field)) {
+    const selected = ['id'].concat(fieldRefField(field).split(',') || [])
+    return `${field.field} { ${selected.join(',')} }`
   }
-  const selected = ['id'].concat(fieldRefField(field).split(',') || [])
-  return `${field.field} { ${selected.join(',')} }`
+  if (fieldUpload(field)) {
+    return `${field.field} { url, name }`
+  }
+  return `${field.field}`
 }
 
 export const noneQuery = gql`
@@ -52,7 +56,7 @@ export function makeListQuery(resource: ResourceItem | undefined) {
   }
   const fields = resource.fields
     .filter((item) => !isOmit(item, ResourceRoute.index))
-    .map(_mapRelatedField)
+    .map(_mapResolveField)
 
   return gql`\
 query (${buildListQueryParams(resource)}) {
@@ -71,7 +75,7 @@ export function makeDetailQuery(resource: ResourceItem | undefined) {
   }
   const fields = resource.fields
     .filter((item) => !isOmit(item, ResourceRoute.detail))
-    .map(_mapRelatedField)
+    .map(_mapResolveField)
 
   return gql`\
 query ($id: ID!) {
@@ -90,10 +94,17 @@ mutation (${buildMutationFields(resource)}) {
 }`
 }
 
-export function makeUpdateMutation(resource: ResourceItem) {
+export function makeUpdateMutation(
+  resource: ResourceItem,
+  updateFields: string[]
+) {
   return gql`\
-mutation (${buildMutationFields(resource, false)}) {
-  ${resourceRouteNames(resource)?.update}(${buildVarFields(resource, false)}) {
+mutation (${buildMutationFields(resource, false, updateFields)}) {
+  ${resourceRouteNames(resource)?.update}(${buildVarFields(
+    resource,
+    false,
+    updateFields
+  )}) {
     id
   }
 }`
@@ -125,10 +136,15 @@ export function isFieldMutable(field: ResourceField, create: boolean = false) {
 
 function buildMutationFields(
   resource: ResourceItem,
-  create: boolean = true
+  create: boolean = true,
+  updateFields?: string[]
 ): string {
   return resource.fields
-    .filter((item) => isFieldMutable(item, create))
+    .filter(
+      (item) =>
+        isFieldMutable(item, create) &&
+        (!updateFields || updateFields.includes(item.field))
+    )
     .map((item) => {
       let type: string
       // @todo fix softref and ref not to id field
@@ -146,10 +162,15 @@ function buildMutationFields(
 
 function buildVarFields(
   resource: ResourceItem,
-  create: boolean = true
+  create: boolean = true,
+  updateFields?: string[]
 ): string {
   return resource.fields
-    .filter((item) => isFieldMutable(item, create))
+    .filter(
+      (item) =>
+        isFieldMutable(item, create) &&
+        (!updateFields || updateFields.includes(item.field))
+    )
     .map((item) => `${item.field}: $${item.field}`)
     .join(', ')
 }

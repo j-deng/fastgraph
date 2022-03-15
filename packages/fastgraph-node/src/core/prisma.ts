@@ -1,5 +1,6 @@
 import { fieldsMap } from 'graphql-fields-list'
 import { RefKeywords } from '../decorators'
+import { DEFAULT_PAGE_SIZE } from './consts'
 import { createLoader, createRefFieldLoader } from './dataloader'
 import {
   fieldFilter,
@@ -7,14 +8,13 @@ import {
   fieldRefIsList,
   fieldRefType,
   fieldSoftRef,
+  fieldUpload,
   idFieldType
 } from './field'
 import { getRegistry } from './registry'
 import { ResourceRoutes } from './route'
 import { ResourceItem, ResourceStore, ResourceField } from './types'
 import { camelize, generateCustomId } from './utils'
-
-const DEFAULT_PAGE_SIZE = parseInt(process.env.DEFAULT_PAGE_SIZE || '20')
 
 const getRepo = (resource: ResourceItem) => {
   const key = resource.decorators.model?.value
@@ -279,6 +279,8 @@ function _prismaSelect(
     const field = resource.fields.find((item) => item.field === k)
     if (field && !field.decorators.resolver) {
       if (select[k] === false) {
+        result[k] = true
+      } else if (fieldUpload(field)) {
         result[k] = true
       } else {
         const _ref = fieldRef(field)

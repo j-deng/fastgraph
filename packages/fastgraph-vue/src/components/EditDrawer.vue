@@ -58,7 +58,7 @@ import { defineComponent, ref, PropType, computed, inject } from 'vue'
 import { useMutation, useQuery } from '@vue/apollo-composable'
 import { Form, message } from 'ant-design-vue'
 import { buildValidationRules } from '../form'
-import { fieldForm } from '../field'
+import { fieldForm, fieldUpload } from '../field'
 import { ResourceItem } from '../types'
 import {
   isFieldMutable,
@@ -136,10 +136,29 @@ export default defineComponent({
     )
     const { resetFields, validate, validateInfos } = useForm(form, rulesRef)
 
+    const mutationVariables = computed(() =>
+      Object.fromEntries(
+        Object.entries(form.value)
+          .map(([key, val]) => {
+            const field = props.resource.fields.find(
+              (field) => field.field === key
+            )
+            // undefined replace null value
+            // val = val === null ? undefined : val
+            // @todo
+            // if upload is not File object(the old value), do not update
+            if (fieldUpload(field) && val && !(val instanceof File)) {
+              return []
+            }
+            return [key, refFieldToInputType(field, val, record.value)]
+          })
+          .filter(([key]) => key)
+      )
+    )
     const mutation = computed(() =>
       isCreate.value
         ? makeCreateMutation(props.resource)
-        : makeUpdateMutation(props.resource)
+        : makeUpdateMutation(props.resource, Object.keys(mutationVariables.value))
     )
     const {
       mutate: createResource,
@@ -147,16 +166,7 @@ export default defineComponent({
       onDone,
       onError
     } = useMutation(mutation, () => ({
-      variables: Object.fromEntries(
-        Object.entries(form.value).map(([key, val]) => {
-          const field = props.resource.fields.find(
-            (field) => field.field === key
-          )
-          // undefined replace null value
-          val = val === null ? undefined : val
-          return [key, refFieldToInputType(field, val, record.value)]
-        })
-      )
+      variables: mutationVariables.value
     }))
 
     const { t } = useI18n()

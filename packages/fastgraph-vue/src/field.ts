@@ -82,6 +82,10 @@ export function fieldEnum(
   return field?.decorators.enum?.value
 }
 
+export function fieldUpload(field: ResourceField | undefined) {
+  return field?.decorators.upload
+}
+
 export function fieldPresent(
   field: ResourceField | undefined,
   record: any
@@ -130,6 +134,12 @@ export function fieldPresent(
       component = 'span'
       attrs = {}
     }
+    return { component, attrs, value }
+  }
+
+  if (fieldUpload(field)) {
+    component = 'fg-upload'
+    attrs = { url: value?.url, image: fieldUpload(field)?.keywords?.image }
     return { component, attrs, value }
   }
 
@@ -204,6 +214,11 @@ export function fieldForm(
   switch (fieldType(field)) {
     case 'Boolean':
       component = filter ? 'fg-bool-select' : 'a-switch'
+      break
+
+    case 'Upload':
+      component = 'fg-upload-select'
+      attrs.name = 'file'
       break
 
     case 'DateTime':

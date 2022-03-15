@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { GraphQLScalarType, Kind } from 'graphql'
+import { GraphQLUpload } from 'graphql-upload'
 
 export const dateScalar = new GraphQLScalarType({
   name: 'Date',
@@ -53,6 +54,7 @@ export const bigIntScalar = new GraphQLScalarType({
 })
 
 export const scalarResolvers = {
+  Upload: GraphQLUpload,
   Date: dateScalar,
   DateTime: dateTimeScalar,
   BigInt: bigIntScalar
@@ -60,6 +62,7 @@ export const scalarResolvers = {
 
 export function buildScalarTypes() {
   return `\
+scalar Upload
 scalar Date
 scalar DateTime
 scalar BigInt\

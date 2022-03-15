@@ -1,5 +1,6 @@
 import {
   fieldRef,
+  fieldUpload,
   filterFields,
   isFieldRequired,
   sortableFields
@@ -17,11 +18,12 @@ import {
   buildResourceResolvers
 } from './resolver'
 import { buildScalarTypes, scalarResolvers } from './scalars'
-import { fieldType } from './fieldTypes'
+import { fieldType, objectFieldType } from './fieldTypes'
 import { capitalize, isOmit, isFieldMutable, resourceModel } from './utils'
 import { ResourceEnums, ResourceItem, ResourceStore } from './types'
 import { ResourceRouteKind, resourceRouteNames, ResourceRoutes } from './route'
 import { getRegistry } from './registry'
+import { buildUploadFieldResolver } from './fileStore'
 
 const resourceFilterInputName = (key: string) => `${capitalize(key)}FilterInput`
 const resourceOrderByInputName = (key: string) =>
@@ -37,7 +39,7 @@ export function buildTypes(store: ResourceStore): string {
     const resource = store[key]
     const fieldTypes = resource.fields
       .filter((item) => !isOmit(item, ResourceRouteKind.read))
-      .map((item) => `${item.field}: ${fieldType(item, key)}`)
+      .map((item) => `${item.field}: ${objectFieldType(item, key)}`)
     schema += `
 type ${key} {
   ${fieldTypes.join('\n  ')}
@@ -75,11 +77,30 @@ type Mutation {
 
 ${buildScalarTypes()}
 
-${_buildRefIdInput()}
-
-${_buildSortEnum()}
-
 ${buildEnumTypes(enums)}
+
+type UploadFile {
+  name: String
+  url: String
+}
+
+input RefIdItem {
+  id: ID!
+}
+
+input RefIdInput {
+  connect: RefIdItem
+}
+
+input RefIdListInput {
+  connect: [RefIdItem]
+  disconnect: [RefIdItem]
+}
+
+enum Sort {
+  asc
+  desc
+}
 `
   return schema
 }
@@ -161,31 +182,6 @@ input ${resourceOrderByInputName(resource.key)} {
 `
 }
 
-function _buildSortEnum() {
-  return `\
-enum Sort {
-  asc
-  desc
-}`
-}
-
-function _buildRefIdInput(): string {
-  return `\
-input RefIdItem {
-  id: ID!
-}
-
-input RefIdInput {
-  connect: RefIdItem
-}
-
-input RefIdListInput {
-  connect: [RefIdItem]
-  disconnect: [RefIdItem]
-}\
-`
-}
-
 /**
  * Build default resolvers for all resources.
  *
@@ -253,6 +249,8 @@ function _buildObjectResolver(resource: ResourceItem) {
       acc[field.field] = buildRefFieldResolver(resource, field)
     } else if (softRef) {
       acc[field.field] = buildSoftRefFieldResolver(field)
+    } else if (fieldUpload(field)) {
+      acc[field.field] = buildUploadFieldResolver(field)
     } else if (
       field.field === 'id' &&
       field.decorators.type?.value === 'BigInt'

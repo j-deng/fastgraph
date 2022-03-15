@@ -6,6 +6,8 @@ import {
 } from '../core/types'
 import { getRegistry } from '../core/registry'
 import { ResourceRoute } from '../core/route'
+import { fieldUpload } from '../core/field'
+import { createUploadFieldTransform } from '../core/fileStore'
 
 export const TransformMiddleware: MiddlewareCreator = ({
   store,
@@ -58,6 +60,10 @@ async function doTransform(resourceKey: string, args: Record<string, any>) {
     return args
   }
   return await Object.entries(transformers).reduce(async (acc, [field, fn]) => {
+    // no transform if field is not in args
+    if (!(field in args)) {
+      return await acc
+    }
     return { ...(await acc), [field]: await fn(args[field]) }
   }, Promise.resolve(args))
 }
@@ -66,5 +72,10 @@ function getFieldTransformer(field: ResourceField) {
   const transformName = field.decorators.transform?.value
   if (transformName) {
     return getRegistry().transforms[transformName]
+  }
+
+  // upload file will add fileStore save transform by default
+  if (fieldUpload(field)) {
+    return createUploadFieldTransform(field)
   }
 }

@@ -41,3 +41,7 @@ export function sortableFields(resource: ResourceItem) {
 export function filterFields(resource: ResourceItem) {
   return resource.fields.filter((field) => field.decorators.filter)
 }
+
+export function fieldUpload(field: ResourceField) {
+  return field.decorators.upload
+}

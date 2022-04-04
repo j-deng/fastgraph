@@ -1,8 +1,9 @@
 import Joi from 'joi'
 import { fieldType } from '../core/fieldTypes'
-import { isFieldRequired } from '../core/field'
+import { fieldName, isFieldRequired } from '../core/field'
 import { MiddlewareCreator, ResourceField, ResourceItem } from '../core/types'
 import { ResourceRoute } from '../core/route'
+import { getRegistry } from '../core/registry'
 
 export const ValidationMiddleware: MiddlewareCreator = ({
   store,
@@ -21,7 +22,8 @@ export const ValidationMiddleware: MiddlewareCreator = ({
   if (resourceKey) {
     makeResourceValidator(store[resourceKey])
     return async ({ parent, args, context, info }, next) => {
-      validate(resourceKey, args)
+      // context object should contains locale key like 'zh-cn'
+      validate(resourceKey, args, context.locale)
       return await next(parent, args, context, info)
     }
   }
@@ -41,16 +43,22 @@ function makeResourceValidator(resource: ResourceItem) {
           getJoiValidator(field, fieldType(field, resource.key, false))
         ])
       )
-    )
+    ).prefs({
+      messages: getRegistry().joiMessages as any
+    })
   }
   return _joiValidatorCacheMap[resource.key]
 }
 
-function validate(resourceKey: string, args: any) {
+function validate(resourceKey: string, args: any, language?: string) {
   if (!_joiValidatorCacheMap[resourceKey]) {
     throw new Error(`No validator for resource ${resourceKey}`)
   }
-  const result = _joiValidatorCacheMap[resourceKey].validate(args)
+  const result = _joiValidatorCacheMap[resourceKey].validate(args, {
+    errors: {
+      language
+    }
+  })
   if (result.error) {
     throw result.error
   }
@@ -60,10 +68,13 @@ function getJoiValidator(field: ResourceField, fieldType: string) {
   const validation = field.decorators.validation
   if (validation) {
     const type = validation.value || getJoiType(fieldType)
-    const joiObj = Object.entries(validation.keywords || {}).reduce(
-      (acc, [k, v]) => (acc as any)[k](v === true ? undefined : v),
-      Joi[type as 'number' | 'string' | 'date']()
-    )
+    const joiObj = Object.entries(validation.keywords || {})
+      .reduce(
+        (acc, [k, v]) => (acc as any)[k](v === true ? undefined : v),
+        Joi[type as 'number' | 'string' | 'date']()
+      )
+      // @todo translation issue for field name
+      .label(fieldName(field))
     if (!isFieldRequired(field)) {
       if (type === 'string') {
         return joiObj.allow(null).allow('')

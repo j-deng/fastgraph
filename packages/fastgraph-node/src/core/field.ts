@@ -6,6 +6,10 @@ export function idFieldType(resource: ResourceItem): IDTypes {
   return prismaModelIdType(resource.key)
 }
 
+export function fieldName(field: ResourceField | undefined) {
+  return field?.decorators.field?.value || field?.name
+}
+
 export function fieldRef(field: ResourceField | undefined) {
   return field?.decorators.ref?.value
 }

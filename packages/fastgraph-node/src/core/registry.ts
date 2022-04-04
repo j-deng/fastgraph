@@ -14,6 +14,10 @@ type ResourceType = {
   fields: FieldType[]
 }
 
+type LanguageMessages = {
+  [locale: string]: Record<string, string>
+}
+
 interface RegistryCreateOptions {
   prisma: any
   middlewares?: MiddlewareCreator[]
@@ -21,6 +25,7 @@ interface RegistryCreateOptions {
   transfroms?: TransformFn[]
   enums?: ResourceEnums
   fileStore?: FileStoreAdapter
+  joiMessages?: LanguageMessages
 }
 
 export class MetaRegistry {
@@ -32,15 +37,13 @@ export class MetaRegistry {
   middlewares: { [key: string]: MiddlewareCreator } = {}
   globalMiddlewares: string[] = []
   transforms: { [key: string]: TransformFn } = {}
-  fileStore: FileStoreAdapter
+  fileStore: FileStoreAdapter | undefined
+  joiMessages: LanguageMessages
 
   constructor(opts?: RegistryCreateOptions) {
-    if (opts?.prisma) {
-      this.registerPrismaClient(opts.prisma)
-    }
-    if (opts?.fileStore) {
-      this.registerFileStore(opts.fileStore)
-    }
+    this.prisma = opts?.prisma
+    this.fileStore = opts?.fileStore
+    this.joiMessages = opts?.joiMessages || {}
     if (opts?.middlewares) {
       opts.middlewares.map(this.registerMiddleware.bind(this))
     }
@@ -56,14 +59,6 @@ export class MetaRegistry {
       TransformMiddleware
     ]
     this.setGlobalMiddlewares(globalMiddlewares)
-  }
-
-  registerPrismaClient(prisma: any) {
-    this.prisma = prisma
-  }
-
-  registerFileStore(fileStore: FileStoreAdapter) {
-    this.fileStore = fileStore
   }
 
   registerResource(constructor: Function, name?: string) {

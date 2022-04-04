@@ -22,7 +22,7 @@ export function buildUploadFieldResolver(field: ResourceField) {
     }
     return {
       name: _removeTimestamp(key),
-      url: await fileStore.getUrl(bucket, key, secure)
+      url: await fileStore?.getUrl(bucket, key, secure)
     }
   }
 }
@@ -35,7 +35,7 @@ export function createUploadFieldTransform(field: ResourceField) {
     if (!_file) {
       return ''
     }
-    return await fileStore.save(_addTimestamp(_file.filename), _file, {
+    return await fileStore?.save(_addTimestamp(_file.filename), _file, {
       bucket,
       secure
     })

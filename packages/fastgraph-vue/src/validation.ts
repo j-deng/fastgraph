@@ -2,25 +2,45 @@ import Joi from 'joi'
 import { fieldType, isFieldRequired } from './field'
 import { ResourceField, ResourceItem } from './types'
 
-export function buildValidationRules(resource: ResourceItem, allow: boolean) {
+export type LanguageMessages = {
+  [locale: string]: Record<string, string>
+}
+
+let _joiMessages: LanguageMessages = {}
+
+export const registerJoiMessages = (messages: LanguageMessages) => {
+  _joiMessages = messages
+}
+
+export function buildValidationRules(
+  resource: ResourceItem,
+  locale: string,
+  allow: boolean
+) {
   return Object.fromEntries(
     resource.fields.map((field) => {
       const rules: any[] = []
       if (allow) {
         if (isFieldRequired(field)) {
-          rules.push({ required: true })
+          rules.push({
+            required: true,
+            validator: () => Promise.resolve(undefined)
+          })
         }
         rules.push({
           validator: async (rule: any, value: any) => {
             // required is checked above
-            if (value) {
-              const { error } = getJoiValidator(
-                field,
-                fieldType(field)
-              ).validate(value)
-              if (error) {
-                throw error
+            const { error } = getJoiValidator(field, fieldType(field)).validate(
+              value,
+              {
+                messages: _joiMessages[locale],
+                errors: {
+                  label: false
+                }
               }
+            )
+            if (error) {
+              throw error
             }
             return value
           }

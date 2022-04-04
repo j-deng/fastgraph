@@ -57,7 +57,7 @@
 import { defineComponent, ref, PropType, computed, inject } from 'vue'
 import { useMutation, useQuery } from '@vue/apollo-composable'
 import { Form, message } from 'ant-design-vue'
-import { buildValidationRules } from '../form'
+import { buildValidationRules } from '../validation'
 import { fieldForm, fieldUpload } from '../field'
 import { ResourceItem } from '../types'
 import {
@@ -117,6 +117,7 @@ export default defineComponent({
       form.value = value ? { ...value } : defaultValue()
     })
 
+    const { t, locale } = useI18n()
     const { fieldName_t } = useTranslation()
 
     const formItems = computed<FormItem[]>(() =>
@@ -132,7 +133,7 @@ export default defineComponent({
     )
 
     const rulesRef = computed(() =>
-      buildValidationRules(props.resource, props.visible)
+      buildValidationRules(props.resource, locale.value, props.visible)
     )
     const { resetFields, validate, validateInfos } = useForm(form, rulesRef)
 
@@ -158,7 +159,10 @@ export default defineComponent({
     const mutation = computed(() =>
       isCreate.value
         ? makeCreateMutation(props.resource)
-        : makeUpdateMutation(props.resource, Object.keys(mutationVariables.value))
+        : makeUpdateMutation(
+            props.resource,
+            Object.keys(mutationVariables.value)
+          )
     )
     const {
       mutate: createResource,
@@ -168,8 +172,6 @@ export default defineComponent({
     } = useMutation(mutation, () => ({
       variables: mutationVariables.value
     }))
-
-    const { t } = useI18n()
 
     onDone((res) => {
       refetchList()

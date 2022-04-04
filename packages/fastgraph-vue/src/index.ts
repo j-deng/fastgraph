@@ -11,13 +11,22 @@ import UploadSelect from './components/form/UploadSelect.vue'
 
 import Entry from './components/Entry.vue'
 import useTranslation from './composables/translation'
+import { LanguageMessages, registerJoiMessages } from './validation'
 
 export * from './types'
 export { getResourcePermissions, getRouteAwareConfig } from './utils'
 export { Entry, Resource, useTranslation }
 
 export default {
-  install: (app: App<any>) => {
+  install: (
+    app: App<any>,
+    options?: {
+      joiMessages?: LanguageMessages
+    }
+  ) => {
+    if (options?.joiMessages) {
+      registerJoiMessages(options.joiMessages)
+    }
     app.component('fg-resource', Resource)
     app.component('fg-ref', RefField)
     app.component('fg-enum', EnumField)

@@ -3,8 +3,27 @@ import OSS from 'ali-oss'
 import { FILE_STORE_EXPIRE_TIME } from '../core/consts'
 import { FileStoreAdapter } from '../core/fileStore'
 
+export interface AliossStoreOptions {
+  region: string
+  accessKeyId: string
+  accessKeySecret: string
+  baseUrl: string
+}
+
 export class AliossStore implements FileStoreAdapter {
+  opts: AliossStoreOptions
   clients: Record<string, OSS> = {}
+
+  constructor(opts?: AliossStoreOptions) {
+    const env = process.env
+    // @ts-ignore
+    this.opts = opts || {
+      region: env.ALIOSS_REGION,
+      accessKeyId: env.ALIOSS_ACCESS_KEY_ID,
+      accessKeySecret: env.ALIOSS_ACCESS_KEY_SECRET,
+      baseUrl: env.ALIOSS_BASE_URL
+    }
+  }
 
   async save(
     key: string,
@@ -18,7 +37,7 @@ export class AliossStore implements FileStoreAdapter {
       (file as any).createReadStream()
     )
     if (status !== 200) {
-      throw new Error('UPload to alioss failed')
+      throw new Error('Upload to alioss failed')
     }
     return key
   }
@@ -29,10 +48,7 @@ export class AliossStore implements FileStoreAdapter {
 
   async getUrl(bucket: string, key: string, secure: boolean): Promise<string> {
     if (!secure) {
-      return this.getClient(bucket).generateObjectUrl(
-        key,
-        process.env.ALIOSS_BASE_URL
-      )
+      return this.getClient(bucket).generateObjectUrl(key, this.opts.baseUrl)
     }
     return this.getClient(bucket).signatureUrl(key, {
       expires: FILE_STORE_EXPIRE_TIME
@@ -41,14 +57,12 @@ export class AliossStore implements FileStoreAdapter {
 
   getClient(bucket: string) {
     if (!this.clients[bucket]) {
-      const env = process.env
       const config = {
-        region: env.ALIOSS_REGION,
-        accessKeyId: env.ALIOSS_ACCESS_KEY_ID,
-        accessKeySecret: env.ALIOSS_ACCESS_KEY_SECRET,
-        bucket: env.ALIOSS_BUCKET
+        region: this.opts.region,
+        accessKeyId: this.opts.accessKeyId,
+        accessKeySecret: this.opts.accessKeySecret,
+        bucket
       }
-      // @ts-ignore
       this.clients[bucket] = new OSS(config)
     }
     return this.clients[bucket]

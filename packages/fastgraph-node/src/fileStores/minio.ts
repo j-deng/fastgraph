@@ -3,13 +3,21 @@ import { Client } from 'minio'
 import { FILE_STORE_EXPIRE_TIME } from '../core/consts'
 import { FileStoreAdapter } from '../core/fileStore'
 
+export interface MinioStoreOptions {
+  endPoint: string
+  port: string
+  useSSL: boolean
+  accessKey: string
+  secretKey: string
+}
+
 export class MinioStore implements FileStoreAdapter {
   client: Client
   private baseUrl: string
 
-  constructor() {
+  constructor(opts?: MinioStoreOptions) {
     const env = process.env
-    const config = {
+    const config = opts || {
       endPoint: env.MINIO_ENDPOINT || 'localhost',
       port: parseInt(env.MINIO_PORT || '9000'),
       useSSL: env.MINIO_USESSL === 'true',

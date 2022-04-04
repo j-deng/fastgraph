@@ -1,4 +1,3 @@
-import { MinioStore } from '../fileStores/minio'
 import {
   PermissionCheckMiddleware,
   ValidationMiddleware,

@@ -52,7 +52,6 @@ import { makeListQuery, resourceRouteNames } from '../core'
 import { ResourceItem, ResourceRoute } from '../types'
 import RecordOperation from './RecordOperation.vue'
 import ResourceField from './ResourceField.vue'
-import Chart from './Chart.vue'
 import { columnEllipsis, columnWidth, isOmit, isSortableField } from '../field'
 import useMatrix from '../composables/matrix'
 import useRecordOperation from '../composables/recordOpeartion'
@@ -83,8 +82,7 @@ export default defineComponent({
   components: {
     RecordOperation,
     ResourceField,
-    Chart
-    // Chart: defineAsyncComponent(() => import('./Chart.vue'))
+    Chart: defineAsyncComponent(() => import('./Chart.vue'))
   },
 
   setup() {

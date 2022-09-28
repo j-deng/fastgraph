@@ -90,11 +90,11 @@ export function buildCreateResolver(
   )
   const connectConverter = refConnectTypeConverter(resource)
   return (parent: any, args: Record<string, any>, context: any, info: any) => {
-    const convertedConnect = convertConnect(connectConverter, args)
+    const converted = convertConnect(connectConverter, args)
     return repository.create({
       data: {
         ...args,
-        ...convertedConnect,
+        ...converted,
         id: useCustomId ? generateCustomId() : undefined
       },
       select: _prismaSelect(store, resource, fieldsMap(info))
@@ -110,10 +110,10 @@ export function buildUpdateResolver(
   const idType = idTypeConverter(resource)
   const connectConverter = refConnectTypeConverter(resource)
   return (parent: any, args: Record<string, any>, context: any, info: any) => {
-    const convertedConnect = convertConnect(connectConverter, args)
+    const converted = convertConnect(connectConverter, args)
     return repository.update({
       where: { id: idType(args.id) },
-      data: { ...args, ...convertedConnect, id: undefined },
+      data: { ...args, ...converted, id: undefined },
       select: _prismaSelect(store, resource, fieldsMap(info))
     })
   }
@@ -157,11 +157,7 @@ const refConnectTypeConverter = (
       const idType = _idTypeConverters[fieldType]
       const isList = fieldRefIsList(field)
       let connectConvert: Function
-      if (!isList) {
-        connectConvert = (val: { connect?: { id: string | undefined } }) => ({
-          connect: val.connect?.id && { id: idType(val.connect.id) }
-        })
-      } else {
+      if (isList) {
         connectConvert = (val: {
           connect?: { id: string }[]
           disconnect?: { id: string }[]
@@ -169,6 +165,19 @@ const refConnectTypeConverter = (
           connect: val.connect?.map((v) => ({ id: idType(v.id) })),
           disconnect: val.disconnect?.map((v) => ({ id: idType(v.id) }))
         })
+      } else {
+        connectConvert = (val?: { connect?: { id: string | undefined } }) => {
+          if (val?.connect?.id) {
+            return {
+              connect: { id: idType(val.connect.id) }
+            }
+          } else {
+            // no value is disconnect
+            return {
+              disconnect: true
+            }
+          }
+        }
       }
       return [field.field, connectConvert]
     })
@@ -181,7 +190,7 @@ const convertConnect = (
   return Object.fromEntries(
     connectConverter.map(([field, converter]) => [
       field,
-      args[field] && converter(args[field])
+      converter(args[field])
     ])
   )
 }

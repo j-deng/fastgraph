@@ -1,4 +1,5 @@
 import { App } from 'vue'
+import Entry from './components/Entry.vue'
 import Resource from './components/Resource.vue'
 import RefField from './components/fields/Ref.vue'
 import EnumField from './components/fields/Enum.vue'
@@ -9,13 +10,12 @@ import BoolSelect from './components/form/BoolSelect.vue'
 import DateTime from './components/form/DateTime.vue'
 import UploadSelect from './components/form/UploadSelect.vue'
 
-import Entry from './components/Entry.vue'
-import useTranslation from './composables/translation'
-import { LanguageMessages, registerJoiMessages } from './validation'
-
 export * from './types'
+import { LanguageMessages, registerJoiMessages } from './validation'
+export { default as useTranslation } from './composables/translation'
 export { getResourcePermissions, getRouteAwareConfig } from './utils'
-export { Entry, Resource, useTranslation }
+
+export { Entry, Resource }
 
 export default {
   install: (

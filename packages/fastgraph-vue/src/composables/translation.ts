@@ -1,8 +1,14 @@
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { resourceName } from '../core'
-import { fieldName } from '../field'
 import { ResourceField, ResourceItem } from '../types'
+
+function resourceName(resource: ResourceItem): string {
+  return resource.decorators.resource?.value || resource.key
+}
+
+function fieldName(field: ResourceField | undefined) {
+  return field?.decorators.field?.value || field?.name
+}
 
 export default function useTranslation() {
   const { t } = useI18n()

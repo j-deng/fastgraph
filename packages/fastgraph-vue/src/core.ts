@@ -27,10 +27,6 @@ const resourceFilterInputName = (key: string) => `${capitalize(key)}FilterInput`
 const resourceOrderByInputName = (key: string) =>
   `${capitalize(key)}OrderByInput`
 
-export function resourceName(resource: ResourceItem): string {
-  return resource.decorators.resource?.value || resource.key
-}
-
 function _mapResolveField(field: ResourceField) {
   if (fieldRef(field) || fieldSoftRef(field)) {
     const selected = ['id'].concat(fieldRefField(field).split(',') || [])

@@ -30,17 +30,19 @@ export function buildValidationRules(
         rules.push({
           validator: async (rule: any, value: any) => {
             // required is checked above
-            const { error } = getJoiValidator(field, fieldType(field)).validate(
-              value,
-              {
+            if (value !== undefined && value !== null) {
+              const { error } = getJoiValidator(
+                field,
+                fieldType(field)
+              ).validate(value, {
                 messages: _joiMessages[locale],
                 errors: {
                   label: false
                 }
+              })
+              if (error) {
+                throw error
               }
-            )
-            if (error) {
-              throw error
             }
             return value
           }
@@ -54,13 +56,16 @@ export function buildValidationRules(
 function getJoiValidator(field: ResourceField, fieldType: string) {
   const validation = field.decorators.validation
   if (validation) {
-    const type = validation.value || getJoiType(fieldType)
+    const type = (validation.value || getJoiType(fieldType)) as
+      | 'number'
+      | 'string'
+      | 'date'
     return Object.entries(validation.keywords || {}).reduce((acc, [k, v]) => {
       let options = v === true ? undefined : v
       // fix `Built-in TLD list disabled` issue
       options = k === 'email' && !options ? { tlds: { allow: false } } : options
       return (acc as any)[k](options)
-    }, Joi[type as 'number' | 'string' | 'date']())
+    }, Joi[type]())
   }
   return Joi.any()
 }

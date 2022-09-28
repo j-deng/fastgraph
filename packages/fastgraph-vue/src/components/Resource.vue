@@ -69,6 +69,10 @@ export default defineComponent({
     },
     extRecordOperations: {
       type: Array as PropType<RecordOperationItem[]>
+    },
+    defaultFilters: {
+      type: Object as PropType<any>,
+      default: () => ({})
     }
   },
 
@@ -120,6 +124,10 @@ export default defineComponent({
     provide(
       'extRecordOperations',
       computed(() => props.extRecordOperations)
+    )
+    provide(
+      'defaultFilters',
+      computed(() => props.defaultFilters)
     )
 
     const selectedRowKeys = ref([])

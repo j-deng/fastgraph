@@ -17,7 +17,7 @@
           </a-form-item>
         </a-col>
       </template>
-      <a-col :span="6">
+      <a-col :span="6" :style="{ paddingBottom: '24px' }">
         <a-button type="primary" html-type="submit">
           {{ $t('Search') }}
         </a-button>
@@ -62,10 +62,14 @@ export default defineComponent({
     const resource = inject('resource') as Ref<ResourceItem>
     const { fieldName_t } = useTranslation()
     const { setFilters, filters } = useRouteFilter(resource)
+    const defaultFilters = inject('defaultFilters') as Ref<any>
 
     const filterFields = computed(() =>
       resource.value.fields
-        .filter((field) => fieldFilter(field))
+        .filter(
+          // do not show default filters
+          (field) => !defaultFilters.value[field.field] && fieldFilter(field)
+        )
         .map((field) => {
           const { component, attrs } = fieldForm(field, true)
           return {

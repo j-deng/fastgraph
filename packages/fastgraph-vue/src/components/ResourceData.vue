@@ -87,8 +87,10 @@ export default defineComponent({
 
   setup() {
     const resource = inject('resource') as Ref<ResourceItem>
+    const defaultFilters = inject('defaultFilters') as Ref<object>
     const { filters, pageAndSorter, addPageAndSorter } =
       useRouteFilter(resource)
+
     const total = ref(0)
     const current = computed(() => pageAndSorter.value.page)
     const pageSize = computed(() => pageAndSorter.value.pageSize)
@@ -98,6 +100,7 @@ export default defineComponent({
       current: current.value,
       pageSize: pageSize.value
     }))
+
     const orderBy = computed(() => {
       const _sorter = sorter.value
       if (_sorter?.order) {
@@ -106,11 +109,12 @@ export default defineComponent({
         }
       }
     })
+
     const variables = computed(() => {
       return {
         skip: (current.value - 1) * pageSize.value,
         take: pageSize.value,
-        filter: filters.value,
+        filter: { ...defaultFilters.value, ...filters.value },
         orderBy: orderBy.value || {
           id: 'desc'
         }

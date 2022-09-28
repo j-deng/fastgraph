@@ -110,17 +110,10 @@ export default defineComponent({
         : []
       const allRecords =
         hasFilters.value || isFilterById()
-          ? uniqBy(
-              filterByIdResult.value
-                .concat(queryValues)
-                .concat(props.multiple ? propsValues : []),
-              'id'
-            )
-          : uniqBy(
-              filterByIdResult.value.concat(propsValues).concat(queryValues),
-              'id'
-            )
-      return allRecords.map((item: any) => ({
+          ? filterByIdResult.value.concat(queryValues).concat(propsValues)
+          : filterByIdResult.value.concat(propsValues).concat(queryValues)
+
+      return uniqBy(allRecords, 'id').map((item: any) => ({
         ...item,
         _label: item[props.refField]
       }))

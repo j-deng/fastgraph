@@ -14,8 +14,15 @@ export interface MinioStoreOptions {
 export class MinioStore implements FileStoreAdapter {
   client: Client
   private baseUrl: string
+  bucketPrefix: string
 
-  constructor(opts?: MinioStoreOptions) {
+  /**
+   * MinioStore constructor
+   * @param opts MinioStoreOptions
+   * @param bucketPrefix the prefix of buckets,
+   *  useful when deployed to multi environments or with multi instances
+   */
+  constructor(opts?: MinioStoreOptions, bucketPrefix = '') {
     const env = process.env
     const config = opts || {
       endPoint: env.MINIO_ENDPOINT || 'localhost',
@@ -29,6 +36,7 @@ export class MinioStore implements FileStoreAdapter {
     this.baseUrl = `${config.useSSL ? 'https' : 'http'}://${config.endPoint}${
       config.port ? ':' + config.port : ''
     }`
+    this.bucketPrefix = bucketPrefix || env.BUCKET_PREFIX || ''
   }
 
   async save(
@@ -36,11 +44,8 @@ export class MinioStore implements FileStoreAdapter {
     file: FileHandle,
     opts: { bucket: string; secure?: boolean }
   ): Promise<string> {
-    await this.client.putObject(
-      opts.bucket,
-      key,
-      (file as any).createReadStream()
-    )
+    const bucket = this.getRealBucket(opts.bucket)
+    await this.client.putObject(bucket, key, (file as any).createReadStream())
     return key
   }
 
@@ -49,6 +54,8 @@ export class MinioStore implements FileStoreAdapter {
   }
 
   async getUrl(bucket: string, key: string, secure: boolean): Promise<string> {
+    bucket = this.getRealBucket(bucket)
+
     if (!secure) {
       return this.getInsecureUrl(bucket, key)
     }
@@ -58,6 +65,10 @@ export class MinioStore implements FileStoreAdapter {
       key,
       FILE_STORE_EXPIRE_TIME
     )
+  }
+
+  getRealBucket(bucket: string) {
+    return this.bucketPrefix + bucket
   }
 
   getInsecureUrl(bucket: string, key: string) {

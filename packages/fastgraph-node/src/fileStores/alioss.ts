@@ -12,9 +12,16 @@ export interface AliossStoreOptions {
 
 export class AliossStore implements FileStoreAdapter {
   opts: AliossStoreOptions
+  bucketPrefix: string
   clients: Record<string, OSS> = {}
 
-  constructor(opts?: AliossStoreOptions) {
+  /**
+   * AliossStore constructor
+   * @param opts AliossStoreOptions
+   * @param bucketPrefix the prefix of buckets,
+   *  useful when deployed to multi environments or with multi instances
+   */
+  constructor(opts?: AliossStoreOptions, bucketPrefix = '') {
     const env = process.env
     // @ts-ignore
     this.opts = opts || {
@@ -23,6 +30,7 @@ export class AliossStore implements FileStoreAdapter {
       accessKeySecret: env.ALIOSS_ACCESS_KEY_SECRET,
       baseUrl: env.ALIOSS_BASE_URL
     }
+    this.bucketPrefix = bucketPrefix || env.BUCKET_PREFIX || ''
   }
 
   async save(
@@ -61,7 +69,7 @@ export class AliossStore implements FileStoreAdapter {
         region: this.opts.region,
         accessKeyId: this.opts.accessKeyId,
         accessKeySecret: this.opts.accessKeySecret,
-        bucket
+        bucket: this.bucketPrefix + bucket
       }
       this.clients[bucket] = new OSS(config)
     }

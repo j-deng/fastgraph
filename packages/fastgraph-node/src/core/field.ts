@@ -7,7 +7,7 @@ export function idFieldType(resource: ResourceItem): IDTypes {
 }
 
 export function fieldName(field: ResourceField | undefined) {
-  return field?.decorators.field?.value || field?.name
+  return field?.decorators.field?.value || field?.name || field?.field
 }
 
 export function fieldRef(field: ResourceField | undefined) {

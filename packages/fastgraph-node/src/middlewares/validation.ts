@@ -23,7 +23,7 @@ export const ValidationMiddleware: MiddlewareCreator = ({
     makeResourceValidator(store[resourceKey])
     return async ({ parent, args, context, info }, next) => {
       // context object should contains locale key like 'zh-cn'
-      validate(resourceKey, args, context.locale)
+      validateResource(resourceKey, args, context.locale)
       return await next(parent, args, context, info)
     }
   }
@@ -50,7 +50,11 @@ function makeResourceValidator(resource: ResourceItem) {
   return _joiValidatorCacheMap[resource.key]
 }
 
-function validate(resourceKey: string, args: any, language?: string) {
+export function validateResource(
+  resourceKey: string,
+  args: any,
+  language?: string
+) {
   if (!_joiValidatorCacheMap[resourceKey]) {
     throw new Error(`No validator for resource ${resourceKey}`)
   }

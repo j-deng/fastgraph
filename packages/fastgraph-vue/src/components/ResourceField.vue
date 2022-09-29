@@ -1,18 +1,4 @@
 <template>
-  <a
-    v-if="result.component === 'link'"
-    @click="
-      () => {
-        if (result.attrs?.newTab) {
-          open(result.value)
-        } else {
-          $router.push(result.value)
-        }
-      }
-    "
-  >
-    {{ result.value }}
-  </a>
   <span v-if="result.component === 'span'">{{ result.value }}</span>
   <component v-else :is="result.component" v-bind="result.attrs" />
 </template>
@@ -45,7 +31,7 @@ export default defineComponent({
       return fieldPresent(field, record)
     })
 
-    return { result, open: (link: string) => window.open(link) }
+    return { result }
   }
 })
 </script>

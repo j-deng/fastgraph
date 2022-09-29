@@ -101,23 +101,17 @@ export function fieldPresent(
   const element: string | undefined = field.decorators.present?.value
   const keywords = field?.decorators.present?.keywords
 
-  switch (element) {
-    case 'link':
-      attrs = keywords || {}
-      if ((value as string)?.startsWith('http')) {
-        attrs = { newTab: true, ...attrs }
-      }
-      return { component: 'link', attrs, value }
-
-    default:
-      if (element) {
-        return {
-          component: element,
-          // present decorator keywords and default values
-          attrs: { ...keywords, value, record, fieldKey },
-          value
-        }
-      }
+  if (element) {
+    let targetElement = element
+    if (['link', 'clickable'].includes(element)) {
+      targetElement = 'fg-' + element
+    }
+    return {
+      component: targetElement,
+      // present decorator keywords and default values
+      attrs: { ...keywords, value, record, fieldKey },
+      value
+    }
   }
 
   if (fieldEnum(field)) {

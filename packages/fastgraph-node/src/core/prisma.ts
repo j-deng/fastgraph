@@ -14,7 +14,7 @@ import {
 import { getRegistry } from './registry'
 import { ResourceRoutes } from './route'
 import { ResourceItem, ResourceStore, ResourceField } from './types'
-import { camelize, generateCustomId } from './utils'
+import { camelize, generateCustomId, isFieldMutableSimple } from './utils'
 
 const getRepo = (resource: ResourceItem) => {
   const key = resource.decorators.model?.value
@@ -151,31 +151,40 @@ const refConnectTypeConverter = (
   resource: ResourceItem
 ): [string, Function][] => {
   return resource.fields
-    .filter((field) => fieldRef(field) && fieldRefType(field) !== 'String')
+    .filter(
+      (field) =>
+        isFieldMutableSimple(field) &&
+        fieldRef(field) &&
+        fieldRefType(field) !== 'String'
+    )
     .map((field) => {
       const fieldType = fieldRefType(field)
       const idType = _idTypeConverters[fieldType]
       const isList = fieldRefIsList(field)
       let connectConvert: Function
+      
       if (isList) {
-        connectConvert = (val: {
+        connectConvert = (val?: {
           connect?: { id: string }[]
           disconnect?: { id: string }[]
-        }) => ({
-          connect: val.connect?.map((v) => ({ id: idType(v.id) })),
-          disconnect: val.disconnect?.map((v) => ({ id: idType(v.id) }))
-        })
+        }) => {
+          if (val) {
+            return {
+              connect: val.connect?.map((v) => ({ id: idType(v.id) })),
+              disconnect: val.disconnect?.map((v) => ({ id: idType(v.id) }))
+            }
+          }
+        }
       } else {
         connectConvert = (val?: { connect?: { id: string | undefined } }) => {
           if (val?.connect?.id) {
             return {
               connect: { id: idType(val.connect.id) }
             }
-          } else {
-            // no value is disconnect
-            return {
-              disconnect: true
-            }
+          }
+          // no value is disconnect
+          return {
+            disconnect: true
           }
         }
       }

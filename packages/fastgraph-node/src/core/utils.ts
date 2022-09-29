@@ -69,6 +69,10 @@ export function isOmit(
   }
 }
 
+export function isFieldMutableSimple(field: ResourceField) {
+  return !isOmit(field, [ResourceRoute.create, ResourceRoute.update])
+}
+
 export function isFieldMutable(field: ResourceField, create: boolean = false) {
   // filter omit
   if (create && isOmit(field, ResourceRoute.create)) {

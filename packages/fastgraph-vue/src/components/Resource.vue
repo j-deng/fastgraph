@@ -1,6 +1,6 @@
 <template>
   <template v-if="resource">
-    <section v-if="showTable">
+    <section v-if="showTable && showHeader">
       <ResourceFilter />
       <ResourceAction />
     </section>
@@ -61,6 +61,10 @@ export default defineComponent({
       type: Boolean,
       default: true
     },
+    showHeader: {
+      type: Boolean,
+      default: true
+    },
     chartStyle: {
       type: Object
     },
@@ -84,7 +88,9 @@ export default defineComponent({
     ViewDrawer
   },
 
-  setup(props) {
+  emits: ['fieldClick'],
+
+  setup(props, ctx) {
     const schema = inject('SCHEMA') as Ref<ResourceStore>
     const drawerVisible = ref<boolean>(false)
     const viewDrawerVisible = ref<boolean>(false)
@@ -129,6 +135,9 @@ export default defineComponent({
       'defaultFilters',
       computed(() => props.defaultFilters)
     )
+    provide('onFieldClicked', (record: any, field: string) => {
+      ctx.emit('fieldClick', { record, field })
+    })
 
     const selectedRowKeys = ref([])
     const onSelectedRowKeys = (keys: any) => (selectedRowKeys.value = keys)

@@ -4,6 +4,7 @@ import Resource from './components/Resource.vue'
 import RefField from './components/fields/Ref.vue'
 import EnumField from './components/fields/Enum.vue'
 import UploadField from './components/fields/Upload.vue'
+import Clickable from './components/fields/Clickable.vue'
 import RefSelect from './components/form/RefSelect.vue'
 import EnumSelect from './components/form/EnumSelect.vue'
 import BoolSelect from './components/form/BoolSelect.vue'
@@ -30,6 +31,7 @@ export default {
     app.component('fg-resource', Resource)
     app.component('fg-ref', RefField)
     app.component('fg-enum', EnumField)
+    app.component('fg-clickable', Clickable)
     app.component('fg-upload', UploadField)
     app.component('fg-ref-select', RefSelect)
     app.component('fg-enum-select', EnumSelect)

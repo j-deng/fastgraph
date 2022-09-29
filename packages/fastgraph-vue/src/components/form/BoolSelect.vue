@@ -10,8 +10,7 @@ import { defineComponent, ref, watch } from 'vue'
 
 export default defineComponent({
   props: {
-    value: Boolean,
-    enumKey: String
+    value: Boolean
   },
 
   setup(props, ctx) {

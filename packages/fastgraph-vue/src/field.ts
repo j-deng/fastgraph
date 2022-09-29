@@ -111,7 +111,12 @@ export function fieldPresent(
 
     default:
       if (element) {
-        return { component: element, attrs: { value, record, fieldKey }, value }
+        return {
+          component: element,
+          // present decorator keywords and default values
+          attrs: { ...keywords, value, record, fieldKey },
+          value
+        }
       }
   }
 
@@ -235,7 +240,7 @@ export function fieldForm(
     case 'Int':
     case 'Float':
       component = 'a-input-number'
-      attrs.style = 'width: 200px'
+      attrs.style = filter ? 'width: 100%' : 'width: 200px'
       break
 
     default:

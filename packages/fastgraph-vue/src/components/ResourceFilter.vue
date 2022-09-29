@@ -68,7 +68,9 @@ export default defineComponent({
       resource.value.fields
         .filter(
           // do not show default filters
-          (field) => !defaultFilters.value[field.field] && fieldFilter(field)
+          (field) =>
+            defaultFilters.value[field.field] === undefined &&
+            fieldFilter(field)
         )
         .map((field) => {
           const { component, attrs } = fieldForm(field, true)

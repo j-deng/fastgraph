@@ -162,7 +162,7 @@ const refConnectTypeConverter = (
       const idType = _idTypeConverters[fieldType]
       const isList = fieldRefIsList(field)
       let connectConvert: Function
-      
+
       if (isList) {
         connectConvert = (val?: {
           connect?: { id: string }[]
@@ -216,7 +216,7 @@ function buildListFilters(resource: ResourceItem, filter: Object) {
         if (fieldRefIsList(field)) {
           return { [key]: { some: { id: val } } }
         }
-        return { [key]: { id: val } }
+        return { [key]: val ? { id: val } : null }
       }
       if (fieldFilter(field)?.search) {
         return { [key]: { contains: val } }

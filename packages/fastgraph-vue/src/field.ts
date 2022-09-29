@@ -207,7 +207,11 @@ export function fieldForm(
   if (field?.field === 'id') {
     return {
       component: 'a-input',
-      attrs: { ...attrs, disabled: true, style: 'width: 200px' }
+      attrs: {
+        ...attrs,
+        disabled: !filter,
+        style: filter ? '' : 'width: 200px'
+      }
     }
   }
 

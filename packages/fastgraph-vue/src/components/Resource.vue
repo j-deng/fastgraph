@@ -8,6 +8,7 @@
       ref="resourceDataRef"
       :showChart="showChart"
       :showTable="showTable"
+      :showPagination="showPagination"
       :chartStyle="chartStyle"
       :chartOptions="chartOptions"
     />
@@ -62,6 +63,10 @@ export default defineComponent({
       default: true
     },
     showHeader: {
+      type: Boolean,
+      default: true
+    },
+    showPagination: {
       type: Boolean,
       default: true
     },

@@ -15,7 +15,7 @@
     :dataSource="dataSource"
     :columns="columns"
     :loading="loading"
-    :pagination="pagination"
+    :pagination="showPagination ? pagination : false"
     :scroll="{ x: '1300' }"
     :sorter="sorter"
     @change="handleTableChange"
@@ -68,6 +68,10 @@ export default defineComponent({
       default: true
     },
     showTable: {
+      type: Boolean,
+      default: true
+    },
+    showPagination: {
       type: Boolean,
       default: true
     },

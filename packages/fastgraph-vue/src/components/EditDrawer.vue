@@ -180,7 +180,7 @@ export default defineComponent({
     })
 
     onError((err) => {
-      message.error(err.message)
+      message.error(t(err.message))
     })
 
     const onSubmit = () => {

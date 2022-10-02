@@ -103,7 +103,7 @@ export function fieldPresent(
 
   if (element) {
     let targetElement = element
-    if (['link', 'clickable'].includes(element)) {
+    if (['link', 'clickable', 'image'].includes(element)) {
       targetElement = 'fg-' + element
     }
     return {

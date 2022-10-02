@@ -2,6 +2,7 @@
   <a-select
     v-model:value="selectValue"
     :filterOption="filterOption"
+    :placeholder="$t('Please select')"
     @change="handleChange"
     allowClear
     showSearch

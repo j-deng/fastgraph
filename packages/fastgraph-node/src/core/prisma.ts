@@ -221,6 +221,10 @@ function buildListFilters(resource: ResourceItem, filter: Object) {
       if (fieldFilter(field)?.search) {
         return { [key]: { contains: val } }
       }
+      if (field?.field === 'id') {
+        const idType = idTypeConverter(resource)
+        return { [key]: idType(val) }
+      }
       return { [key]: val }
     })
   }

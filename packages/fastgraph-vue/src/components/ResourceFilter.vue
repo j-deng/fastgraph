@@ -110,7 +110,7 @@ export default defineComponent({
 
     watch(resource, (after, before) => {
       if (before && after && after.key !== before.key) {
-        form.value = emptyValues()
+        form.value = defaultValue()
       }
     })
 

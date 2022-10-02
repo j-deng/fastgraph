@@ -156,7 +156,10 @@ function buildEnumTypes(enums: ResourceEnums) {
 
 function buildFilterInput(resource: ResourceItem) {
   const fields = filterFields(resource).map((field) => {
-    const type = fieldRef(field) ? 'ID' : fieldType(field, resource.key, false)
+    const type =
+      fieldRef(field) || field.field === 'id'
+        ? 'ID'
+        : fieldType(field, resource.key, false)
     return `${field.field}: ${type}`
   })
 

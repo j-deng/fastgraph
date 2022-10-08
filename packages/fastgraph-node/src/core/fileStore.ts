@@ -29,13 +29,14 @@ export function buildUploadFieldResolver(field: ResourceField) {
 
 export function createUploadFieldTransform(field: ResourceField) {
   const { fileStore } = getRegistry()
+  // TODO add file size limit
   const { bucket, secure } = field?.decorators?.upload?.keywords as any
   return async (file: Promise<FileHandle>) => {
     const _file = (await file) as any
     if (!_file) {
       return ''
     }
-    return await fileStore?.save(_addTimestamp(_file.filename), _file, {
+    return await fileStore?.save(_addTimestamp(_file.filename.trim()), _file, {
       bucket,
       secure
     })

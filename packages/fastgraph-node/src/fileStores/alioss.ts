@@ -40,10 +40,7 @@ export class AliossStore implements FileStoreAdapter {
   ): Promise<string> {
     const {
       res: { status }
-    } = await this.getClient(opts.bucket).put(
-      key,
-      (file as any).createReadStream()
-    )
+    } = await this.getClient(opts.bucket).put(key, file.createReadStream())
     if (status !== 200) {
       throw new Error('Upload to alioss failed')
     }

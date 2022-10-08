@@ -45,7 +45,7 @@ export class MinioStore implements FileStoreAdapter {
     opts: { bucket: string; secure?: boolean }
   ): Promise<string> {
     const bucket = this.getRealBucket(opts.bucket)
-    await this.client.putObject(bucket, key, (file as any).createReadStream())
+    await this.client.putObject(bucket, key, file.createReadStream())
     return key
   }
 

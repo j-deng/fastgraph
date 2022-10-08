@@ -1,6 +1,6 @@
 {
   "name": "fastgraph-vue",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "fastgraph is a fullstack framework for building graphql api and admin system",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

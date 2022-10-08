@@ -7,6 +7,7 @@ export interface AliossStoreOptions {
   region: string
   accessKeyId: string
   accessKeySecret: string
+  endpoint?: string
   baseUrl: string
 }
 
@@ -28,6 +29,7 @@ export class AliossStore implements FileStoreAdapter {
       region: env.ALIOSS_REGION,
       accessKeyId: env.ALIOSS_ACCESS_KEY_ID,
       accessKeySecret: env.ALIOSS_ACCESS_KEY_SECRET,
+      endpoint: env.ALIOSS_ENDPOINT,
       baseUrl: env.ALIOSS_BASE_URL
     }
     this.bucketPrefix = bucketPrefix || env.BUCKET_PREFIX || ''
@@ -63,9 +65,8 @@ export class AliossStore implements FileStoreAdapter {
   getClient(bucket: string) {
     if (!this.clients[bucket]) {
       const config = {
-        region: this.opts.region,
-        accessKeyId: this.opts.accessKeyId,
-        accessKeySecret: this.opts.accessKeySecret,
+        ...this.opts,
+        baseUrl: undefined,
         bucket: this.bucketPrefix + bucket
       }
       this.clients[bucket] = new OSS(config)

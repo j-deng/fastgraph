@@ -242,6 +242,12 @@ export function buildRefFieldResolver(
   field: ResourceField
 ) {
   return async (parent: any, args: any, context: any, info: any) => {
+    // if ref if included in query result, just use it
+    // it's useful when we want to hide sensitive fields or reduce query
+    if (parent[field.field] !== undefined) {
+      return parent[field.field]
+    }
+
     const keywords = field.decorators.ref?.keywords as RefKeywords
     // if field is ref model on id field, use simple dataloader
     // @todo support `to` field not id
@@ -252,6 +258,7 @@ export function buildRefFieldResolver(
         return createLoader(model).load(id)
       }
     }
+
     let model = resource.decorators.model?.value
     // else use dataloader that prisma select refs
     if (model) {
@@ -263,6 +270,10 @@ export function buildRefFieldResolver(
 
 export function buildSoftRefFieldResolver(field: ResourceField) {
   return async (parent: any, args: any, context: any, info: any) => {
+    if (parent[field.field] !== undefined) {
+      return parent[field.field]
+    }
+    
     const keywords = field.decorators.softRef?.keywords as RefKeywords
     // @todo support `to` field not id
     if (keywords.to === 'id') {

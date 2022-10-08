@@ -176,16 +176,16 @@ const refConnectTypeConverter = (
           }
         }
       } else {
-        connectConvert = (val?: { connect?: { id: string | undefined } }) => {
+        connectConvert = (val?: {
+          connect?: { id: string | undefined }
+          disconnect: boolean
+        }) => {
           if (val?.connect?.id) {
             return {
               connect: { id: idType(val.connect.id) }
             }
           }
-          // no value is disconnect
-          return {
-            disconnect: true
-          }
+          return val
         }
       }
       return [field.field, connectConvert]
@@ -273,7 +273,7 @@ export function buildSoftRefFieldResolver(field: ResourceField) {
     if (parent[field.field] !== undefined) {
       return parent[field.field]
     }
-    
+
     const keywords = field.decorators.softRef?.keywords as RefKeywords
     // @todo support `to` field not id
     if (keywords.to === 'id') {

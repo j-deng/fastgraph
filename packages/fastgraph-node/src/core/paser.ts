@@ -90,6 +90,7 @@ input RefIdItem {
 
 input RefIdInput {
   connect: RefIdItem
+  disconnect: Boolean
 }
 
 input RefIdListInput {

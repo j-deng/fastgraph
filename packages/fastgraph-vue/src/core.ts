@@ -216,27 +216,37 @@ export function refFieldToInputType(
   value: any,
   record: any
 ) {
-  if (field && fieldRef(field) && value) {
-    if (fieldRefIsList(field)) {
-      const connects = value.map((item: { id: any }) => item.id)
-      const disconnects =
-        (record && record[field.field])
-          ?.map((item: { id: any }) => item.id)
-          .filter((id: any) => !connects.includes(id)) || []
-      const input: any = {}
-      if (connects.length) {
-        input.connect = connects.map((id: any) => ({ id }))
-      }
-      if (disconnects.length) {
-        input.disconnect = disconnects.map((id: any) => ({ id }))
-      }
-      return input
+  if (!field) return value
+
+  if (fieldRefIsList(field) && value) {
+    // if ref is list, empty value is []
+    const connects = value.map((item: { id: any }) => item.id)
+    const disconnects =
+      (record && record[field.field])
+        ?.map((item: { id: any }) => item.id)
+        .filter((id: any) => !connects.includes(id)) || []
+    const input: any = {}
+    if (connects.length) {
+      input.connect = connects.map((id: any) => ({ id }))
     }
-    return { connect: { id: value.id } }
+    if (disconnects.length) {
+      input.disconnect = disconnects.map((id: any) => ({ id }))
+    }
+    return input
   }
+
+  if (fieldRef(field)) {
+    if (value) {
+      return { connect: { id: value.id } }
+    } else if (record && record[field.field]) {
+      return { disconnect: true }
+    }
+  }
+
   if (fieldSoftRef(field) && value) {
     return value[fieldSoftRefToField(field)]
   }
+
   return value
 }
 

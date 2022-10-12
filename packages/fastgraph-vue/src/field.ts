@@ -117,7 +117,7 @@ export function fieldPresent(
   if (fieldEnum(field)) {
     const { value_t } = useTranslation()
     component = 'fg-enum'
-    value = value_t(value)
+    value = value && value_t(value)
     return { component, attrs: { value, enumKey: fieldEnum(field) }, value }
   }
 
@@ -126,10 +126,10 @@ export function fieldPresent(
     const refField = fieldRefField(field)
     if (fieldRefIsList(field)) {
       component = 'fg-ref'
-      value = value.map((item: any) => item[refField])
+      value = value.map((item: any) => mapRefFieldValues(item, refField))
       attrs = { value }
     } else {
-      value = value[refField]
+      value = mapRefFieldValues(value, refField)
       component = 'span'
       attrs = {}
     }
@@ -185,6 +185,7 @@ export function fieldForm(
         multiple: filter ? false : fieldRefIsList(field),
         module: fieldRef(field) || fieldSoftRef(field),
         refField: fieldRefField(field),
+        filter: keywords?.filter ? JSON.parse(keywords.filter) : {},
         take: keywords?.take || 20,
         sortBy: keywords?.sortBy,
         sortOrder: keywords?.sortOrder
@@ -289,4 +290,12 @@ export function isOmit(
       if (omit[item]) return true
     }
   }
+}
+
+export function mapRefFieldValues(obj: any, refField: string) {
+  const fields = refField.split(',')
+  if (fields.length > 1 && obj[fields[1]]) {
+    return `${obj[fields[0]]}(${obj[fields[1]]})`
+  }
+  return obj[fields[0]]
 }

@@ -240,6 +240,8 @@ export function refFieldToInputType(
       return { connect: { id: value.id } }
     } else if (record && record[field.field]) {
       return { disconnect: true }
+    } else {
+      return undefined
     }
   }
 

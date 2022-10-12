@@ -39,6 +39,7 @@ import {
   resourceRouteNames
 } from '../../core'
 import { ResourceItem, ResourceStore } from '../../types'
+import { mapRefFieldValues } from '../../field'
 
 export default defineComponent({
   props: {
@@ -62,6 +63,9 @@ export default defineComponent({
       type: Number,
       default: 20
     },
+    filter: {
+      type: Object
+    },
     sortBy: {
       type: String
     },
@@ -83,7 +87,7 @@ export default defineComponent({
     const filters = ref<any>({})
     const variables = computed(() => ({
       take: props.take,
-      filter: filters.value,
+      filter: { ...filters.value, ...props.filter },
       orderBy: orderBy.value
     }))
     const { result, loading, onResult } = useQuery(query, variables, () => ({
@@ -115,7 +119,7 @@ export default defineComponent({
 
       return uniqBy(allRecords, 'id').map((item: any) => ({
         ...item,
-        _label: item[props.refField]
+        _label: mapRefFieldValues(item, props.refField)
       }))
     })
 
@@ -167,7 +171,7 @@ export default defineComponent({
     }
 
     const search = debounce((value: string) => {
-      filters.value = value ? { [props.refField]: value } : {}
+      filters.value = value ? { [props.refField.split(',')[0]]: value } : {}
     }, 300)
 
     const filterOption = (input: any, option: any) => {

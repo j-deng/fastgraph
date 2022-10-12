@@ -1,6 +1,6 @@
 import { fieldsMap } from 'graphql-fields-list'
 import { RefKeywords } from '../decorators'
-import { DEFAULT_PAGE_SIZE } from './consts'
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from './consts'
 import { createLoader, createRefFieldLoader } from './dataloader'
 import {
   fieldFilter,
@@ -56,7 +56,7 @@ export function buildListResolver(
         select: _prismaSelect(store, resource, queryFields.data as MapResult),
         orderBy: args.orderBy,
         skip: args.skip,
-        take: args.take || DEFAULT_PAGE_SIZE
+        take: Math.min(args.take || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
       })
     }
     if ('count' in queryFields) {
@@ -210,6 +210,9 @@ function buildListFilters(resource: ResourceItem, filter: Object) {
     AND: Object.entries(filter).map(([key, val]) => {
       const field = resource.fields.find((field) => field.field === key)
       if (fieldRef(field)) {
+        if (val === 'NOT NULL') {
+          return { [key]: { isNot: null } }
+        }
         const fieldType = fieldRefType(field)
         const idType = _idTypeConverters[fieldType]
         val = idType(val)
